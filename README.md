@@ -15,3 +15,5 @@ When a user inputs lyrics, the system uses Tacotron to synthesize speech. Tacotr
 - [Ji-won Kwak](https://github.com/Kwak-Jiwon)
 - [Ji-min Kim](https://github.com/xxjimin)
 
+<img width="80%" src="https://github.com/user-attachments/assets/d4f4bf4b-0ce6-4452-ba38-2d437aa183f4"/>
+<img width="80%" src="https://github.com/user-attachments/assets/f0ca0060-0af7-4388-8343-d630e5a94f64"/>
