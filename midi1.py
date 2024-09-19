@@ -18,9 +18,6 @@ from sklearn.utils import shuffle
 
 !pip install mido pretty_midi
 
-# 필요한 패키지 설치
-!pip install mido pretty_midi
-
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -42,16 +39,15 @@ def piano_roll_to_midi(piano_roll, midi_path, fs=16, length_factor=10):
     midi = pretty_midi.PrettyMIDI()
     instrument = pretty_midi.Instrument(program=0)  # Acoustic Grand Piano
 
-    # 피아노 롤이 (time_steps, 128) 형태인지 확인하고 전치(transpose) 필요 시 변환
     if piano_roll.shape[1] != 128:
         piano_roll = piano_roll.T  # (128, time_steps)로 변환
 
     for pitch, row in enumerate(piano_roll):
         note_on = None
         for time, value in enumerate(row):
-            if value > 0.5 and note_on is None:  # 노트가 시작되는 지점
+            if value > 0.5 and note_on is None:
                 note_on = time
-            elif value <= 0.5 and note_on is not None:  # 노트가 끝나는 지점
+            elif value <= 0.5 and note_on is not None:
                 note = pretty_midi.Note(
                     velocity=100,
                     pitch=pitch,
@@ -60,7 +56,6 @@ def piano_roll_to_midi(piano_roll, midi_path, fs=16, length_factor=10):
                 )
                 instrument.notes.append(note)
                 note_on = None
-        # If a note was started and never ended, end it at the last time step
         if note_on is not None:
             note = pretty_midi.Note(
                 velocity=100,
@@ -76,13 +71,6 @@ def piano_roll_to_midi(piano_roll, midi_path, fs=16, length_factor=10):
 
 # 피아노 롤 시각화 함수
 def plot_piano_roll(notes: pd.DataFrame, count: Optional[int] = None, title: str = "Piano Roll"):
-    """
-    피아노 롤을 시각화하는 함수입니다.
-
-    :param notes: pd.DataFrame, 'pitch', 'start', 'end' 컬럼을 포함하는 데이터프레임
-    :param count: Optional[int], 시각화할 노트의 개수 (기본값은 None)
-    :param title: str, 그래프의 제목
-    """
     if count:
         title = f'First {count} notes'
     else:
@@ -110,9 +98,9 @@ def plot_loss(d_losses, g_losses):
     plt.grid(True)
     plt.show()
 
-# Optimizer를 설정하는 함수
+# Optimizer를 설정하는 함수 (학습률 조정)
 def build_optimizer():
-    initial_learning_rate = 0.0002
+    initial_learning_rate = 0.0001  # <-- 학습률을 0.0001로 수정
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
         initial_learning_rate=initial_learning_rate,
         decay_steps=10000,
@@ -121,19 +109,19 @@ def build_optimizer():
 
 # MidiNet 모델 정의
 class MidiNet(tf.keras.Model):
-    def __init__(self, batch_size=72, output_w=32, output_h=128, y_dim=10, prev_dim=1, z_dim=100, gf_dim=64, df_dim=64,
-                 gfc_dim=1024, dfc_dim=1024, c_dim=1):
+    def __init__(self, batch_size=64, output_w=32, output_h=128, y_dim=10, prev_dim=1, z_dim=256, gf_dim=128, df_dim=128,
+                 gfc_dim=2048, dfc_dim=2048, c_dim=1):
         super(MidiNet, self).__init__()
         self.batch_size = batch_size
         self.output_w = output_w  # 더 긴 출력 길이
         self.output_h = output_h
         self.y_dim = y_dim
         self.prev_dim = prev_dim
-        self.z_dim = z_dim
-        self.gf_dim = gf_dim
-        self.df_dim = df_dim
-        self.gfc_dim = gfc_dim
-        self.dfc_dim = dfc_dim
+        self.z_dim = z_dim  # <-- 노이즈 벡터 크기를 256으로 수정
+        self.gf_dim = gf_dim  # <-- 생성자의 필터 크기를 128로 수정
+        self.df_dim = df_dim  # <-- 판별자의 필터 크기를 128로 수정
+        self.gfc_dim = gfc_dim  # 생성자 fully-connected layer 크기
+        self.dfc_dim = dfc_dim  # 판별자 fully-connected layer 크기
         self.c_dim = c_dim
 
         self.build_model()
@@ -218,10 +206,9 @@ midi_path = '/content/FlyMeToTheMoon.mid'  # MIDI 파일 경로
 piano_roll = midi_to_piano_roll(midi_path)
 
 # 훈련 데이터를 위한 전처리
-# 정확히 (16, 128)의 배수로 자르기
 target_shape = 16 * 128  # 리쉐이프하려는 목표 크기
 length = (piano_roll.shape[0] // target_shape) * target_shape  # 정확한 배수로 자르기
-piano_roll = piano_roll[:length]  # 데이터를 정확한 크기로 자르기
+piano_roll = piano_roll[:length]
 
 # prev_X와 data_X 생성
 prev_X = piano_roll.reshape(-1, 16, 128, 1)[:-1]
@@ -234,15 +221,15 @@ data_y = np.zeros((data_X.shape[0], 10), dtype=np.float32)  # 레이블을 0으�
 data_X, prev_X, data_y = shuffle(data_X, prev_X, data_y, random_state=0)
 
 # 훈련 설정
-batch_size = 72
-epochs = 51
+batch_size = 64  # <-- 배치 크기를 64로 수정
+epochs = 100  # 학습을 조금 더 오래 진행하도록 에포크 수 증가
 batch_idxs = len(data_X) // batch_size
 
 # 모델 인스턴스 생성
 model = MidiNet()
 
 # 샘플 입력 생성
-sample_z = np.random.normal(0, 1, (batch_size, model.z_dim)).astype(np.float32)
+sample_z = np.random.normal(0, 1, (batch_size, model.z_dim)).astype(np.float32)  # <-- 노이즈 벡터 크기 수정
 sample_prev = prev_X[:batch_size]
 sample_labels = data_y[:batch_size]
 
@@ -259,52 +246,40 @@ for epoch in range(epochs):
         batch_images = data_X[idx * batch_size:(idx + 1) * batch_size]
         prev_batch_images = prev_X[idx * batch_size:(idx + 1) * batch_size]
         batch_labels = data_y[idx * batch_size:(idx + 1) * batch_size]
-        batch_z = np.random.normal(0, 1, [batch_size, model.z_dim]).astype(np.float32)
+        batch_z = np.random.normal(0, 1, [batch_size, model.z_dim]).astype(np.float32)  # <-- 노이즈 벡터 크기 수정
 
         d_loss, g_loss, _ = model.train_step(batch_images, prev_batch_images, batch_labels, batch_z)
 
-        # 학습 과정 확인
         if idx % 10 == 0:
             print(f"Epoch: [{epoch + 1}/{epochs}], Step: [{idx}/{batch_idxs}], D Loss: {d_loss:.4f}, G Loss: {g_loss:.4f}")
 
         epoch_d_loss += d_loss
         epoch_g_loss += g_loss
 
-    # 에포크당 평균 손실 계산
     d_losses.append(epoch_d_loss / batch_idxs)
     g_losses.append(epoch_g_loss / batch_idxs)
 
-    # 각 에포크마다 생성된 샘플 (그래프를 그리지 않음)
     generated_samples = model.generator(sample_z, sample_labels, sample_prev)
     generated_samples = generated_samples.numpy()
 
-    # 학습 중간 결과 출력 (그래프를 그리지 않음)
-    print(f"Epoch: [{epoch + 1}/{epochs}], D Loss: {d_loss:.4f}, G Loss: {g_loss:.4f}")
-
-    # 생성된 샘플을 MIDI 파일로 저장 (필요 시)
-    if epoch % 10 == 0:  # 10 에포크마다 저장
+    if epoch % 10 == 0:
         num_samples_to_save = min(len(generated_samples), 5)
         for i, extended_sample in enumerate(generated_samples[:num_samples_to_save]):
-            # 피아노 롤의 채널(마지막 차원)이 있는 경우, 채널을 제거해야 함
             extended_sample_2d = extended_sample[:, :, 0] if extended_sample.ndim == 3 else extended_sample
             midi_filename = f'/content/extended_sample_epoch_{epoch + 1}_sample_{i + 1}.mid'
-            piano_roll_to_midi(extended_sample_2d, midi_filename, length_factor=10)  # 노트 길이 10배 증가
+            piano_roll_to_midi(extended_sample_2d, midi_filename, length_factor=10)
 
 # 학습 완료 후 그래프 그리기
 print("Training completed.")
-
-# 손실 함수 값 시각화
 plot_loss(d_losses, g_losses)
 
 # 마지막 에포크에서 생성된 샘플을 시각화
 num_samples_to_visualize = min(len(generated_samples), 5)
 
 for i in range(num_samples_to_visualize):
-    # 생성된 샘플을 피아노 롤로 변환
-    sample_piano_roll = generated_samples[i][:, :, 0]  # 채널 축 제거
-    sample_piano_roll = (sample_piano_roll > 0.5).astype(int)  # 바이너리화
+    sample_piano_roll = generated_samples[i][:, :, 0]
+    sample_piano_roll = (sample_piano_roll > 0.5).astype(int)
 
-    # 피아노 롤을 노트 이벤트로 변환
     pitches, positions = np.where(sample_piano_roll == 1)
     notes_df = pd.DataFrame({
         'pitch': pitches,
@@ -313,3 +288,6 @@ for i in range(num_samples_to_visualize):
     })
 
     plot_piano_roll(notes_df, title=f'Final Sample {i + 1}')
+
+
+
