@@ -1,4 +1,4 @@
-# AIPL
+# AIPL: Ai-Player
 
 
 ## 👨‍🏫 Project Overview
