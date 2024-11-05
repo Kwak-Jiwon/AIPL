@@ -1,0 +1,7 @@
+tensorflow
+pretty_midi
+numpy
+pandas
+matplotlib
+seaborn
+fluidsynth
