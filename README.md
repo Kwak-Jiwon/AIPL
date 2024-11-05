@@ -32,3 +32,86 @@ AIPL/
 ├── utils.py                     # Utility functions for data loading and MIDI processing
 ├── requirements.txt             # List of required libraries
 └── README.md                    # Project documentation
+```
+
+
+## 🛠️ Usage
+
+### Installation
+
+Clone this repository and install the required dependencies:
+
+```bash
+git clone <repository_url>
+cd AIPL
+pip install -r requirements.txt
+```
+
+## Configuration
+
+Edit `config.yaml` to specify parameters like `data_path`, `seq_length`, and `learning_rate`. This configuration file should include:
+
+```yaml
+data_path: "path/to/your/midi/files"
+seq_length: 25
+vocab_size: 128
+batch_size: 32
+epochs: 10
+learning_rate: 0.001
+temperature: 2.0
+num_predictions: 120
+instrument_name: "Acoustic Grand Piano"
+```
+
+## Data Preparation
+
+Place your MIDI files in the specified `data_path`. The `load_midi_files` function in `utils.py` will automatically load all `.mid` or `.midi` files from this directory.
+
+## Training the Model
+
+To train the model, run:
+
+```bash
+python train.py
+```
+This script will:
+
+Load the configuration from config.yaml.
+Prepare the MIDI data for training.
+Build the RNN-based model.
+Train the model and save the training history.
+During training, the loss over epochs is plotted to help assess model performance.
+
+
+## Generating Music
+
+After training, use the following command to generate new music:
+
+```bash
+python generate.py
+```
+
+This will:
+
+Load the trained model weights.
+Generate new music sequences using the predict_next_note function.
+Save the generated sequence as a MIDI file.
+
+
+
+## Synchronizing Lyrics with Music
+With Tacotron integrated, input lyrics can be synthesized into melody. This melody can then be aligned with the generated MIDI music, creating a fully harmonized audio file.
+
+## 📈 Model Architecture
+The model is built with TensorFlow and consists of:
+- Multiple stacked LSTM layers for processing MIDI data.
+- Dense output layers for predicting pitch, step, and duration of each note.
+
+
+## 🖥️ Screenshots
+
+## References
+- PrettyMIDI Documentation
+- TensorFlow
+- Tacotron TTS
+
