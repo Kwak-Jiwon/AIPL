@@ -1,0 +1,6 @@
+data_path: "data/"  
+batch_size: 64
+sequence_length: 50
+epochs: 50
+learning_rate: 0.001
+output_file: "output.midi"
