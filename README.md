@@ -1,5 +1,5 @@
 # AIPL: AI Music Composer and Lyric Synchronizer
-#🥇 Won 1st Place in the Self-Directed Career Design Project! 🎉✨
+### 🥇 Won 1st Place in the Self-Directed Career Design Project! 🎉✨
 ## 👨‍🏫 Project Overview
 This project aims to develop a neural network model for generating music using MIDI files. The system can analyze and compose new music based on MIDI data and also synchronize melodies with user-input lyrics through TTS (Text-to-Speech) technology. The primary technologies used in this project are TensorFlow-based RNN models and Tacotron for TTS integration.
 
