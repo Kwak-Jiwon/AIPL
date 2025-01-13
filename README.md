@@ -42,7 +42,7 @@ AIPL/
 Clone this repository and install the required dependencies:
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/Kwak-Jiwon/AIPL
 cd AIPL
 pip install -r requirements.txt
 ```
