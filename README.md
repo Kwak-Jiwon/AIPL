@@ -1,27 +1,27 @@
 # AIPL: AI Music Composer and Lyric Synchronizer
-### 🥇 Won 1st Place in the Self-Directed Career Design Project! 🎉✨
-## 👨‍🏫 Project Overview
+###  Won 1st Place in the Self-Directed Career Design Project! 
+##  Project Overview
 This project aims to develop a neural network model for generating music using MIDI files. The system can analyze and compose new music based on MIDI data and also synchronize melodies with user-input lyrics through TTS (Text-to-Speech) technology. The primary technologies used in this project are TensorFlow-based RNN models and Tacotron for TTS integration.
 
 The core of the system is built on MIDI analysis. MIDI files contain structured information about rhythm, harmony, and melody, which our model uses to learn musical patterns and generate new compositions. When lyrics are input, Tacotron generates a natural-sounding vocal melody, which is synchronized with the generated MIDI music to produce a seamless, complete musical experience.
 
-## ⏲️ Development Period
+##  Development Period
 - 2024-09-01 - present
 
-## 🚀 Technologies Used
+##  Technologies Used
 - **TensorFlow**: For building RNN models that analyze and generate MIDI sequences.
 - **PrettyMIDI**: For reading and manipulating MIDI files.
 - **Tacotron**: For generating speech synthesis that aligns with MIDI-generated music.
 - **Python Libraries**: Including NumPy, Pandas, and Matplotlib for data processing and visualization.
 
-## 🧑‍🤝‍🧑 Developer Information
+##  Developer Information
 - [Ji-eun Seo](https://github.com/Nick-Stokes)
 - [Ji-won Kwak](https://github.com/Kwak-Jiwon)
 - [Ji-min Kim](https://github.com/xxjimin)
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```plaintext
 AIPL/
@@ -35,7 +35,7 @@ AIPL/
 ```
 
 
-## 🛠️ Usage
+##  Usage
 
 ### Installation
 
@@ -108,7 +108,7 @@ The model is built with TensorFlow and consists of:
 - Dense output layers for predicting pitch, step, and duration of each note.
 
 
-## 🖥️ Screenshots
+##  Screenshots
 
 ## References
 - PrettyMIDI Documentation
